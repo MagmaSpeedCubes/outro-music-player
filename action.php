@@ -22,8 +22,14 @@ echo "Beat Drop In: {$hours}h {$minutes}m {$seconds}s {$ms}ms<br>";
 
 ?>
 
+<audio id="outro-music" 
+   preload="auto" 
+   src="./outro-music.mp3" >
+
+</audio>
+
 <script>
-    var audio = new Audio('./outro-music.mp3');
+    var audio = document.getElementById('outro-music');
     audio.preload = true;
     // JavaScript code to handle the audio playback based on the mode and playtime
 
@@ -39,7 +45,7 @@ echo "Beat Drop In: {$hours}h {$minutes}m {$seconds}s {$ms}ms<br>";
         var playtime = "<?php echo $playtime; ?>";
         var targetTime = new Date(playtime);
         var now = new Date();
-        var delayTimeInMilliseconds = targetTime - now;
+        delayTimeInMilliseconds = targetTime - now;
 
 
         //convert ExactTime to DelayTime
@@ -52,6 +58,9 @@ echo "Beat Drop In: {$hours}h {$minutes}m {$seconds}s {$ms}ms<br>";
 
     }
 
+
+
+
     if(delayTimeInMilliseconds >= 58000){
         setTimeout(function() { playAudio(0); }, delayTimeInMilliseconds - 58000);
         //begins playing the audio 58 seconds before the beat drop
@@ -61,10 +70,27 @@ echo "Beat Drop In: {$hours}h {$minutes}m {$seconds}s {$ms}ms<br>";
     }
     //the beat drop occurs at 58 seconds
 
-    function playAudio(startTime){
-        
-        audio.currentTime = startTime;
-        audio.play();
+    function playAudio(startTimeInMilliseconds) {
+
+
+
+        var startTime = startTimeInMilliseconds / 1000; // Convert milliseconds to seconds
+        function seekAndPlay() {
+            console.log("Start Time:"+startTime);
+            audio.currentTime = startTime;
+            console.log("Current Time:"+audio.currentTime);
+            audio.play();
+        }
+
+        if (audio.readyState >= 1) { // HAVE_METADATA
+            seekAndPlay();
+        } else {
+            audio.addEventListener('loadedmetadata', function handler() {
+                audio.removeEventListener('loadedmetadata', handler);
+                seekAndPlay();
+            });
+            audio.load();
+        }
     }
 </script>
 
